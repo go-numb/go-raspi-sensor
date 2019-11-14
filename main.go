@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -40,7 +39,11 @@ func NewClient() *Client {
 			if !isWater(sensor) {
 				return
 			}
-			relay.Toggle()
+			if err := relay.Toggle(); err != nil {
+				logrus.Error(err)
+				return
+			}
+			logrus.Infof("toggle switch")
 		})
 	}
 
@@ -71,7 +74,7 @@ func main() {
 func isWater(sensor *aio.AnalogSensorDriver) bool {
 	val, err := sensor.Read()
 	if err != nil {
-		log.Println("Failed to read", err)
+		logrus.Println("Failed to read", err)
 		return false
 	}
 	cel := (5.0 * float64(val) * 100.0) / 1024
